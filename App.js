@@ -1,20 +1,36 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import * as React from 'react';
+import { StyleSheet } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import TabNavigator from './TabNavigators/TabNavigator'
+import Colors from './assets/Colors'
+import Ionicons from 'react-native-vector-icons/Ionicons';
+const Stack = createStackNavigator();
 
+const MyTheme = {
+  dark: true,
+  colors: {
+    primary: Colors.white,
+    background: Colors.black,
+    card: Colors.darkSlateGray,
+    text: Colors.white,
+    border: Colors.white,
+    notification: Colors.white,
+  },
+};
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer theme={MyTheme}>
+      <Stack.Navigator
+         screenOptions={({ route }) => ({
+          headerShown: false,
+        })}
+      >
+        <Stack.Screen name="TabNavigator" component={TabNavigator}/>
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+  
+})
