@@ -1,48 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import {  StyleSheet, 
-          Text, 
-          View, 
-          FlatList, 
-          SafeAreaView, 
-          RefreshControl,
-          Dimensions } from 'react-native';
-import ListCoin from '../Detail/ListCoinInCryptoAssets';
+import {
+  StyleSheet,
+  Text,
+  View,
+  ScrollView,
+  SafeAreaView,
+  Dimensions
+} from 'react-native';
 import Colors from '../../assets/Colors';
-import { getMarketData } from '../../services/cryptoService'
-import * as Progress from 'react-native-progress';
+import News from '../../components/News';
+import {GetApi} from '../../services/GetApi'
 const ListHeader = () => (
   <>
     <View style={styles.titleWrapper}>
-      <Text style={styles.largeTitle}>News</Text>        
+      <Text style={styles.largeTitle}>News</Text>
     </View>
     <View style={styles.divider} />
   </>
 )
-const wait = (timeout) => {
-  return new Promise(resolve => setTimeout(resolve, timeout));
-}
-export default function MainNews() {
-  const windowWidth = Dimensions.get('window').width;
-  const windowHeight = Dimensions.get('window').height;
-  const [data,setData] = useState([]);
-  const [isLoadingData,setIsLoadingData] = useState(false);
-  const getData = () => {
-    const fetchMarketData = async () => {
-      const marketData = await getMarketData("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=7d");
-      setData(marketData);
-    }
-    fetchMarketData();
-  }
-  useEffect(() => {
-    getData()
-  }, []);
-
-  const onLoading = () => {
-    setIsLoadingData(true)    
-    getData()
-    wait(500).then(() => setIsLoadingData(false));
-  }
-  const ListNewsInLoading = () => (
+const ListNewsInLoading = () => (
+  <>
     <View style={styles.itemWrapperInLoading}>
       <View style={styles.leftWrapperInLoading}>
         <View style={styles.titleWrapperInLoading}>
@@ -54,12 +31,61 @@ export default function MainNews() {
         <View style={styles.rightDownWrapperInLoading}></View>
       </View>
     </View>
-  )
+  </>
+
+)
+const wait = (timeout) => {
+  return new Promise(resolve => setTimeout(resolve, timeout));
+}
+
+export default function MainNews() {
+  const [data, setData] = useState([]);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+  const GetData = async () => {
+    const fetchData = async () => {
+      const dataNews = await GetApi();
+      setData(dataNews);
+      setIsLoadingData(false);
+    }
+    fetchData();
+  }
+  useEffect(() => {
+    GetData()
+  }, []);
+
+  var news = [];
+  if (isLoadingData == false) {
+    for (let i = 0; i < data.length; i++) {
+      news.push(
+        <News
+          key={i}
+          data={data[i]}
+        />
+      )
+    }
+  }
   return (
-      <SafeAreaView style={styles.container}>
-        <ListHeader/>
-        <ListNewsInLoading/>
-      </SafeAreaView>
+    <SafeAreaView style={styles.container}>
+      <ListHeader />
+      {isLoadingData ?
+        <View>
+          <ListNewsInLoading />
+          <ListNewsInLoading />
+          <ListNewsInLoading />
+          <ListNewsInLoading />
+          <ListNewsInLoading />
+          <ListNewsInLoading />
+        </View>
+         :
+        <ScrollView
+          style={styles.scrollWrapper}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+        >
+          {news}
+        </ScrollView>
+      }
+    </SafeAreaView>
   );
 }
 
@@ -76,27 +102,30 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
+  scrollWrapper: {
+    flexGrow: 1,
+  },
   logoInLoading: {
     height: 32,
     width: 32,
     borderRadius: 16,
     backgroundColor: Colors.darkSlateGray,
   },
-  titleWrapperInLoading:{
+  titleWrapperInLoading: {
     marginLeft: 8,
   },
   titleInLoading: {
     width: 150,
     height: 50,
-    marginTop:5,
-    borderRadius:5,
+    marginTop: 5,
+    borderRadius: 5,
     backgroundColor: Colors.darkSlateGray,
   },
   rightDownWrapperInLoading: {
     width: 100,
     height: 17,
-    marginTop:5,
-    borderRadius:5,
+    marginTop: 5,
+    borderRadius: 5,
     backgroundColor: Colors.darkSlateGray,
   },
   rightWrapperInLoading: {
@@ -105,7 +134,10 @@ const styles = StyleSheet.create({
   },
   container: {
     flexDirection: "column",
-
+  },
+  title: {
+    color: Colors.white,
+    fontSize: 15,
   },
   titleWrapper: {
     marginTop: 10,
@@ -128,11 +160,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   refreshing: {
-    width:Dimensions.get('window').width, 
+    width: Dimensions.get('window').width,
     height: 50,
     marginTop: 30,
-    alignItems:'center', 
-    justifyContent:'center'
+    alignItems: 'center',
+    justifyContent: 'center'
   },
 });
-  

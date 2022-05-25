@@ -1,88 +1,206 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, ScrollView, StyleSheet, TouchableOpacity, Dimensions, FlatList, SafeAreaView  } from 'react-native';
+import { Text, View, ScrollView, StyleSheet, TouchableOpacity, Dimensions, FlatList, SafeAreaView } from 'react-native';
 import Colors from '../../assets/Colors'
 import Feather from 'react-native-vector-icons/Feather';
 import ListCoinInHome from '../Detail/ListCoinInHome';
-import { getMarketData } from '../../services/cryptoService'
-const win = Dimensions.get('window');    
+import ListCoinInHomeInLoading from '../Detail/ListCoinInHomeInLoading';
+import { getMarketData } from '../../services/cryptoService';
+import TrendingCoin from '../Detail/TrendingCoins';
+import { GetApi } from '../../services/GetApi';
+import News from '../../components/News'
+const win = Dimensions.get('window');
 
-const Header = () => (
-    <>
-        <SafeAreaView>
+export default function MainHome({ navigation }) {
+    const [marketData, setMarketData] = useState([]);
+    const [trendingData, setTrendingData] = useState([]);
+    const [globalData, setGlobalData] = useState([]);
+    const [newsData, setNewsData] = useState([]);
+
+    const [isLoadingData, setIsLoadingData] = useState(true);
+
+
+    const GetData = () => {
+        const fetchData = async () => {
+            const market = await getMarketData('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=7d');
+            const trending = await getMarketData('https://api.coingecko.com/api/v3/search/trending');
+            const global = await getMarketData('https://api.coingecko.com/api/v3/global');
+            const dataNews = await GetApi();
+            setMarketData(market);
+            setTrendingData(trending.coins);
+            setGlobalData(global.data);
+            setNewsData(dataNews);
+            setIsLoadingData(false);
+        }
+        fetchData();
+    }
+    useEffect(() => {
+        GetData();
+    }, []);
+    const Header = () => (
+        <>
+            <SafeAreaView>
                 <View style={styles.headerContainer}>
                     <Text style={styles.headerText}>CoinMarketCap</Text>
                     <View style={styles.leftHeaderWrapper}>
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             activeOpacity={0.5}
                             style={styles.buttonHeader}
-                            >
-                            <Feather name= 'search' color={Colors.darkGray} size={25}/>
+                            onPress={() => navigation.navigate('Search')}
+
+                        >
+                            <Feather name='search' color={Colors.darkGray} size={25} />
                         </TouchableOpacity>
                         <TouchableOpacity
                             activeOpacity={0.5}
                             style={styles.buttonHeader}
-                            >
-                                <Feather name= 'bell' color={Colors.darkGray} size={25}/>
+                        >
+                            <Feather name='bell' color={Colors.darkGray} size={25} />
                         </TouchableOpacity>
                     </View>
-                </View> 
-                <View style={styles.bottomHeader}>
-                    <Text style={styles.textBottomHeader}></Text>
+                </View>
+                <View style={styles.bottomHeaderWrapper}>
+                    {isLoadingData ?
+                        null :
+                        <Text style={styles.textBottomHeader}>Coins Active: {globalData.active_cryptocurrencies.toLocaleString("en-US", { currency: "USD" })}</Text>
+
+                    }
                 </View>
             </SafeAreaView>
-    </>
-)
-
-export default function MainHome({navigation}) {
-    const [data,setData] = useState([]);
-    const [trendingData,setTrendingData] = useState([]);
-    useEffect(() => {
-      const fetchMarketData = async () => {
-        const marketData = await getMarketData('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=7d');
-        const dataTrending = await getMarketData('https://api.coingecko.com/api/v3/search/trending');
-        setData(marketData);
-        setTrendingData(dataTrending.coins);
-      }
-      fetchMarketData();
-    }, []);
-    return (
+        </>
+    )
+    const ListCoinInLoading = ({ title }) => (
         <>
-        <Header/>
-        <ScrollView>
-            {/* /////// */}
+            <View style={styles.headerBodyWrapper}>
+                <Text style={styles.titleLeftBody}>{title}</Text>
+                <View style={styles.buttonRightBody}>
+                    <Text style={styles.titleRightBody}>See all</Text>
+                </View>
+            </View>
+            <View style={styles.listCoinLoading}>
+                <ListCoinInHomeInLoading />
+                <ListCoinInHomeInLoading />
+                <ListCoinInHomeInLoading />
+            </View>
+        </>
+    )
+    const ListCoin = ({ data, title }) => (
+        <>
             <View style={styles.bodyContainer}>
                 <View style={styles.headerBodyWrapper}>
-                    <Text style={styles.titleLeftBody}>Top Coins</Text>
-                    <TouchableOpacity 
+                    <Text style={styles.titleLeftBody}>{title}</Text>
+                    <TouchableOpacity
                         activeOpacity={0.5}
                         style={styles.buttonRightBody}
-                        >
+                        onPress={() => navigation.jumpTo('CryptoAssets')}
+                    >
                         <Text style={styles.titleRightBody}>See all</Text>
                     </TouchableOpacity>
                 </View>
-                <FlatList 
+                <FlatList
                     keyExtractor={(item) => item.id}
                     data={data}
-                    renderItem={({item}) => (
+                    renderItem={({ item }) => (
                         <ListCoinInHome
+                            id={item.id}
                             name={item.name}
-                            symbol={item.symbol}  
                             currentPrice={item.current_price}
                             priceChangePersentage7d={item.price_change_percentage_7d_in_currency}
                             logoUrl={item.image}
-                            market_cap = {item.market_cap}
-                            marketCapRank = {item.market_cap_rank}
-                            navigation = {navigation}
-                            sparkLine = {item.sparkline_in_7d}
-                            route = {item}
+                            navigation={navigation}
+                            route={item}
                         />
-                      )}
+                    )}
                     horizontal
                     showsVerticalScrollIndicator={false}
                     showsHorizontalScrollIndicator={false}
+                />
+            </View>
+        </>
+    )
+
+    const ListCoinWrapper = ({ title, data }) => {
+        return (
+            <>
+                {isLoadingData ?
+                    <ListCoinInLoading
+                        title={title}
+                    /> :
+                    <ListCoin
+                        data={data}
+                        title={title}
                     />
+                }
+            </>
+        )
+    }
+
+    const ListTrendingCoin = () => {
+        return (
+            <>
+                {
+                    isLoadingData ?
+                        null :
+                        <View style={styles.bodyContainer}>
+                            <View style={styles.headerBodyWrapper}>
+                                <Text style={styles.titleLeftBody}>Trending</Text>
+                                <TouchableOpacity
+                                    activeOpacity={0.5}
+                                    style={styles.buttonRightBody}
+                                    onPress={() => navigation.jumpTo('CryptoAssets')}
+                                >
+                                    <Text style={styles.titleRightBody}>See all</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <TrendingCoin
+                                navigation={navigation}
+                            />
+                        </View>}
+
+            </>
+        )
+    }
+    const ListNews = () => {
+        var news = [];
+        if (isLoadingData == false) {
+            for (let i = 0; i < newsData.length; i++) {
+                news.push(
+                    <News
+                        key={i}
+                        data={newsData[i]}
+                    />
+                )
+            }
+        }
+        return (
+            <>
+                <View style={styles.headerBodyWrapper}>
+                    <Text style={styles.titleLeftBody}>News</Text>
+                    <TouchableOpacity
+                        activeOpacity={0.5}
+                        style={styles.buttonRightBody}
+                        onPress={() => navigation.jumpTo('News')}
+                    >
+                        <Text style={styles.titleRightBody}>See all</Text>
+                    </TouchableOpacity>
                 </View>
-        </ScrollView> 
+                {news}
+            </>
+        )
+    }
+    return (
+        <>
+            <Header
+                globalData={globalData}
+                isLoading={isLoadingData}
+            />
+            <ScrollView>
+                <ListCoinWrapper
+                    title='Top Coins'
+                    data={marketData}
+                />
+                <ListTrendingCoin />
+                <ListNews />
+            </ScrollView>
         </>
     );
 };
@@ -107,7 +225,7 @@ const styles = StyleSheet.create({
     buttonHeader: {
         marginRight: 10,
     },
-    bottomHeader: {
+    bottomHeaderWrapper: {
         width: win.width,
         height: 45,
         marginTop: 10,
@@ -115,10 +233,16 @@ const styles = StyleSheet.create({
         borderTopLeftRadius: 25,
         backgroundColor: Colors.violet,
         alignItems: "center",
+        justifyContent: 'center',
+        flexDirection: "row",
+
+    },
+    bottomHeader: {
+
     },
     textBottomHeader: {
         fontSize: 15,
-        marginTop: 15,
+        color: Colors.white,
     },
     headerBodyWrapper: {
         flexDirection: "row",
@@ -133,5 +257,8 @@ const styles = StyleSheet.create({
     titleRightBody: {
         fontSize: 20,
         color: Colors.indigo,
+    },
+    listCoinLoading: {
+        flexDirection: "row",
     },
 })

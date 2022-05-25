@@ -1,57 +1,57 @@
 import React from 'react';
-import { View, 
-        Text, 
-        StyleSheet, 
-        TouchableOpacity, 
-        Image,
-        Dimensions} from 'react-native';
+import {
+    View,
+    Text,
+    StyleSheet,
+    TouchableOpacity,
+    Image,
+    Dimensions
+} from 'react-native';
 import Colors from '../../assets/Colors';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {LineChart} from 'react-native-chart-kit';
 
-const ListCoin = ({name, symbol, sparkLine, currentPrice, priceChangePersentage7d, logoUrl, navigation, route, marketCapRank, market_cap}) => {
+const ListCoinInCryptoAssets = ({ 
+    id,
+    name,
+    symbol,
+    currentPrice,
+    priceChangePersentage7d,
+    logoUrl,
+    navigation,
+    marketCapRank,
+    market_cap }) => {
     const priceChangeColor = priceChangePersentage7d > 0 ? Colors.green : Colors.red;
     const priceChangePersentage7dIcon = priceChangePersentage7d > 0 ? 'caretup' : 'caretdown';
     return (
-    <TouchableOpacity 
-        activeOpacity={0.5}
-        onPress={() => navigation.navigate('Details',{
-            name,
-            symbol,
-            currentPrice,
-            priceChangePersentage7d,
-            logoUrl,
-            marketCapRank,
-            priceChangeColor,
-            market_cap,
-            sparkLine,
-        })}
+        <TouchableOpacity
+            activeOpacity={0.5}
+            onPress={() => navigation.navigate('Details', { id })}
         >
-        <View style={styles.itemWrapper}>
-            <View style={styles.leftWrapper}>
-                <Image source={{uri: logoUrl}} style={styles.image}></Image>
-                <View style={styles.titleWrapper}>
-                    <Text style={styles.title}>{name}</Text>
-                    <View style={styles.rightDownWrapper}>
-                        <View style={styles.marketCapRankWrapper}>
-                            <Text style={styles.marketCapRank}>{marketCapRank}</Text>    
+            <View style={styles.itemWrapper}>
+                <View style={styles.leftWrapper}>
+                    <Image source={{ uri: logoUrl }} style={styles.image}></Image>
+                    <View style={styles.titleWrapper}>
+                        <Text style={styles.title}>{name}</Text>
+                        <View style={styles.rightDownWrapper}>
+                            <View style={styles.marketCapRankWrapper}>
+                                <Text style={styles.marketCapRank}>{marketCapRank}</Text>
+                            </View>
+                            <Text style={[styles.subtitle, { marginRight: 7 }]}>{symbol.toUpperCase()}</Text>
+                            <View style={[{ marginTop: 5 }]}>
+                                <AntDesign name={priceChangePersentage7dIcon} color={priceChangeColor} size={10} />
+                            </View>
+                            <Text style={[styles.subtitle, { color: priceChangeColor, marginLeft: 5 }]}>{Math.abs(priceChangePersentage7d.toFixed(2))} %</Text>
                         </View>
-                        <Text style={[styles.subtitle, {marginRight: 7}]}>{symbol.toUpperCase()}</Text>
-                        <View style={[{marginTop: 5}]}>
-                            <AntDesign name= {priceChangePersentage7dIcon} color={priceChangeColor} size={10}/>
-                        </View>
-                        <Text style={[styles.subtitle, {color: priceChangeColor, marginLeft: 5}]}>{Math.abs(priceChangePersentage7d.toFixed(2))} %</Text>
                     </View>
                 </View>
+                <View style={styles.rightWrapper}>
+                    <Text style={styles.title}>${currentPrice.toLocaleString("en-US", { currency: "USD" })}</Text>
+                    <Text style={styles.subtitle} >Market Cap ${market_cap.toLocaleString("en-US", { currency: "USD" })}</Text>
+                </View>
             </View>
-            <View style={styles.rightWrapper}>
-                <Text style={styles.title}>${currentPrice.toLocaleString("en-US",{currency: "USD"})}</Text>
-                <Text style={styles.subtitle} >Market Cap ${market_cap.toLocaleString("en-US",{currency: "USD"})}</Text>
-            </View>
-        </View>
-        <View style={styles.divider} />
-    </TouchableOpacity>
-  )
+            <View style={styles.divider} />
+        </TouchableOpacity>
+    )
 }
 const styles = StyleSheet.create({
     itemWrapper: {
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     rightWrapper: {
         alignItems: "flex-end",
     },
-    titleWrapper:{
+    titleWrapper: {
         marginLeft: 8,
     },
     image: {
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
         fontSize: 11,
         color: Colors.darkGray,
     },
-    marketCapRankWrapper: {  
+    marketCapRankWrapper: {
         backgroundColor: Colors.slateGray,
         borderRadius: 5,
         marginRight: 5,
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.slateGray,
         paddingHorizontal: 30,
         marginTop: 10,
-      },
+    },
 })
 
-export default ListCoin;
+export default ListCoinInCryptoAssets;

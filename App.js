@@ -22,15 +22,15 @@ export default function App() {
   return (
     <NavigationContainer theme={MyTheme}>
       <Stack.Navigator
-         screenOptions={({ route }) => ({
+        screenOptions={({ route }) => ({
           headerShown: false,
         })}
       >
-        <Stack.Screen name="TabNavigator" component={TabNavigator}/>
+        <Stack.Screen name="TabNavigator" component={TabNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
 const styles = StyleSheet.create({
-  
+
 })

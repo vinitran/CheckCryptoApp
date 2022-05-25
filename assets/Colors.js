@@ -8,5 +8,6 @@ const Colors = {
     slateGray: '#2F2929',
     violet: '#3861FB',
     indigo: '#1F2530', 
+    purple: '#3551C3',
 };
 export default Colors;
